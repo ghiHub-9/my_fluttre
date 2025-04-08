@@ -3,10 +3,12 @@
 //import 'package:dio/dio.dart';
 import 'dart:convert';
 
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
 import 'package:lastcard/constants/const.dart';
+import 'package:lastcard/controllers/auth/register_controller.dart';
 import 'package:lastcard/pages/login_page.dart';
 import 'package:lastcard/widgest/custom_text_field.dart';
 import 'package:lastcard/constants.dart';
@@ -23,6 +25,7 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
 
+  RegisterController registerController = Get.put(RegisterController());
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _user_FullnameController =
@@ -38,38 +41,38 @@ class _RegisterPageState extends State<RegisterPage> {
 
 // دالة التسجيل في API
 
-Future<void> registerUser() async {
- // final String apiUrl = '${APIConfig.baseUrl}/register'; // استخدم APIConfig.baseUrl
-final String apiUrl = APIConfig.registerEndpoint;
-
-  try {
-    final response = await http.post(
-      Uri.parse(apiUrl),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "first_name": _user_FullnameController.text,
-        "phone_number_number": phone_numberController.text,
-        "password": _passwordController.text,
-      }),
-    );
-
-    final responseData = jsonDecode(response.body);
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم التسجيل بنجاح! يمكنك الآن تسجيل الدخول')),
-      );
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('خطأ أثناء التسجيل: ${responseData["message"] ?? "حدث خطأ غير معروف"}')),
-      );
-    }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('خطأ أثناء الاتصال بالخادم: $e')),
-    );
-  }
-}
+// Future<void> registerUser() async {
+//  // final String apiUrl = '${APIConfig.baseUrl}/register'; // استخدم APIConfig.baseUrl
+// final String apiUrl = APIConfig.registerEndpoint;
+//
+//   try {
+//     final response = await http.post(
+//       Uri.parse(apiUrl),
+//       headers: {"Content-Type": "application/json"},
+//       body: jsonEncode({
+//         "first_name": _user_FullnameController.text,
+//         "phone_number_number": phone_numberController.text,
+//         "password": _passwordController.text,
+//       }),
+//     );
+//
+//     final responseData = jsonDecode(response.body);
+//     if (response.statusCode == 200 || response.statusCode == 201) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(content: Text('تم التسجيل بنجاح! يمكنك الآن تسجيل الدخول')),
+//       );
+//       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));
+//     } else {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(content: Text('خطأ أثناء التسجيل: ${responseData["message"] ?? "حدث خطأ غير معروف"}')),
+//       );
+//     }
+//   } catch (e) {
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       SnackBar(content: Text('خطأ أثناء الاتصال بالخادم: $e')),
+//     );
+//   }
+// }
 
 
 // Future<void> registerUser() async {
@@ -311,42 +314,42 @@ final String apiUrl = APIConfig.registerEndpoint;
 
               ///
               // زر انشاء حساب
-SizedBox(
-  width: double.infinity, // جعل الزر يأخذ العرض بالكامل
-  height: 50, // تحديد الارتفاع
-  child: ElevatedButton(
-    onPressed: () async {
-      if (_formKey.currentState!.validate()) {
-        setState(() {
-          _isLoading = true; // تشغيل مؤشر التحميل
-        });
+              SizedBox(
+                width: double.infinity, // جعل الزر يأخذ العرض بالكامل
+                height: 50, // تحديد الارتفاع
+                child: ElevatedButton(
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
 
-        await registerUser(); // استدعاء دالة التسجيل
 
-        setState(() {
-          _isLoading = false; // إيقاف مؤشر التحميل
-        });
-      }
-    },
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.white, // لون الزر أبيض
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10), // تعديل الزوايا
-      ),
-    ),
-    child: _isLoading
-        ? const CircularProgressIndicator(
-            color: kPrimaryColor) // عرض مؤشر تحميل أثناء الانتظار
-        : const Text(
-            'إنشاء حساب',
-            style: TextStyle(
-              color: kPrimaryColor, // لون النص
-              fontSize: 18, // حجم النص
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-  ),
-),
+                      registerController.registerUser(
+                        firstName: _user_FullnameController.text.trim(),
+                        phoneNumber: phone_numberController.text.trim(),
+                        password: _passwordController.text,
+                      );
+
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white, // لون الزر أبيض
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10), // تعديل الزوايا
+                    ),
+                  ),
+                  child: Obx(
+                        ()=>registerController.isLoading.value
+                        ? const CircularProgressIndicator(color: kPrimaryColor)
+                        :const Text(
+                      'إنشاء حساب',
+                      style: TextStyle(
+                        color: kPrimaryColor, // لون النص
+                        fontSize: 18, // حجم النص
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),),
+
+                ),
+              ),
 
               ///
 

@@ -619,10 +619,7 @@ class _NewCardPageState extends State<NewCardPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ServicesPage()),
-            );
+            Navigator.pop(context);
           },
         ),
       ),

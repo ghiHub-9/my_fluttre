@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:lastcard/controllers/auth/login_controller.dart';
 import 'package:lastcard/pages/services_page.dart';
 import 'package:lastcard/widgest/custom_text_field.dart';
 import 'package:lastcard/constants.dart';
@@ -7,27 +9,27 @@ import 'package:lastcard/pages/register_page.dart';
 import 'package:lastcard/pages/forgotpassword_page.dart';
 
 //api
-class APIService {
-  final Dio _dio = Dio();
-
-  Future<bool> loginUser(String phone, String password) async {
-    try {
-      Response response = await _dio.post(
-        "http://192.168.1.105:8000/api/login",
-        data: {"phone": phone, "password": password},
-      );
-
-      if (response.statusCode == 200) {
-        return true; // نجاح تسجيل الدخول
-      } else {
-        return false;
-      }
-    } catch (e) {
-      print("Error: $e");
-      return false;
-    }
-  }
-}
+// class APIService {
+//   final Dio _dio = Dio();
+//
+//   Future<bool> loginUser(String phone, String password) async {
+//     try {
+//       Response response = await _dio.post(
+//         "http://192.168.1.105:8000/api/login",
+//         data: {"phone": phone, "password": password},
+//       );
+//
+//       if (response.statusCode == 200) {
+//         return true; // نجاح تسجيل الدخول
+//       } else {
+//         return false;
+//       }
+//     } catch (e) {
+//       print("Error: $e");
+//       return false;
+//     }
+//   }
+// }
 
 //
 
@@ -39,6 +41,11 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+
+  /// inject the controller
+  LoginController loginController = Get.put(LoginController());
+
+
   Map<String, bool> fieldErrors = {};
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _passwordController = TextEditingController();
@@ -47,31 +54,31 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
 
 //api
-  Future<void> _handleLogin() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-
-      bool success = await APIService()
-          .loginUser(phone_numberController.text, _passwordController.text);
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (success) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => ServicesPage()),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("فشل تسجيل الدخول، تأكد من البيانات")),
-        );
-      }
-    }
-  }
+//   Future<void> _handleLogin() async {
+//     if (_formKey.currentState!.validate()) {
+//       setState(() {
+//         _isLoading = true;
+//       });
+//
+//       bool success = await APIService()
+//           .loginUser(phone_numberController.text, _passwordController.text);
+//
+//       setState(() {
+//         _isLoading = false;
+//       });
+//
+//       if (success) {
+//         Navigator.pushReplacement(
+//           context,
+//           MaterialPageRoute(builder: (context) => ServicesPage()),
+//         );
+//       } else {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(content: Text("فشل تسجيل الدخول، تأكد من البيانات")),
+//         );
+//       }
+//     }
+//   }
 
 //
   @override
@@ -155,12 +162,37 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(
                 height: 20,
               ),
-              _isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                      ),
-                    )
+              Obx(
+                    () => loginController.isLoading.value
+                        ? const Center(child: CircularProgressIndicator(color: Colors.white,),)
+                        : ElevatedButton(
+                            onPressed: (){
+
+                              if (_formKey.currentState!.validate()) {
+                                loginController.loginUser(
+                                    phoneNumber: phone_numberController.text,
+                                    password: _passwordController.text);
+                              }
+
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              minimumSize: const Size(250, 50),
+                            ),
+                            child: const Text(
+                              'تسجيل الدخول',
+                              style: TextStyle(
+                                  color: kPrimaryColor,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+              ),
+
+
                   // : ElevatedButton(
                   //     onPressed: () async {
                   //       if (_formKey.currentState!.validate()) {
@@ -201,23 +233,7 @@ class _LoginPageState extends State<LoginPage> {
                   //       ),
                   //     ),
                   //   ),
-                  : ElevatedButton(
-                      onPressed: _handleLogin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        minimumSize: const Size(250, 50),
-                      ),
-                      child: const Text(
-                        'تسجيل الدخول',
-                        style: TextStyle(
-                            color: kPrimaryColor,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ),
+
               const SizedBox(
                 height: 10,
               ),

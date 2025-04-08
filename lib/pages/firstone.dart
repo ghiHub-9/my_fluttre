@@ -1,11 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:lastcard/constants.dart';
+import 'package:lastcard/pages/services_page.dart';
 import 'package:lastcard/widgest/nav_drawer.dart';
 
 
 
-class FirstOne extends StatelessWidget {
+class FirstOne extends StatefulWidget {
   const FirstOne({super.key});
+
+  @override
+  State<FirstOne> createState() => _FirstOneState();
+}
+
+class _FirstOneState extends State<FirstOne> {
+
+  final storage = GetStorage();
+
+  @override
+  void initState() {
+    super.initState();
+    checkLoginStatus();
+  }
+
+  void checkLoginStatus() async {
+    await Future.delayed(const Duration(seconds: 1)); // Optional splash delay
+    final token = storage.read('token');
+
+    if (token != null && token.isNotEmpty) {
+      debugPrint("✅ Token found: $token");
+      Get.offAll(ServicesPage()); // Or push replacement to your Home screen
+    } else {
+      debugPrint("❌ No token found");
+    }
+  }
+
+
 
   @override
   Widget build(BuildContext context) {

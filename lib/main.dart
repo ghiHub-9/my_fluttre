@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:lastcard/pages/firstone.dart';
 import 'package:lastcard/pages/login_page.dart';
 import 'package:lastcard/pages/register_page.dart';
@@ -8,7 +10,10 @@ import 'package:lastcard/providers/authentication.dart';
 import 'package:lastcard/widgest/nav_drawer.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Ensures Flutter is ready before async operations
+  await GetStorage.init(); // Initialize GetStorage
+
   runApp(
     ChangeNotifierProvider(
       create: (context) => Auth(),
@@ -22,7 +27,7 @@ class FirstPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       locale: const Locale('ar'), // تأكد من أن التطبيق يستخدم العربية
       builder: (context, child) {

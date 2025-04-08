@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:lastcard/constants.dart';
+import 'package:lastcard/controllers/auth/logout_controller.dart';
+import 'package:lastcard/controllers/requests_status/requests_status_controller.dart';
 import 'package:lastcard/pages/newcard_page.dart';
 import 'package:lastcard/pages/renewingcard_page.dart';
 import 'package:lastcard/pages/lostcard_page.dart';
@@ -8,12 +11,9 @@ import 'package:lastcard/pages/modifycard_page.dart';
 class ServicesPage extends StatelessWidget {
   ServicesPage({super.key});
 
-  final List<Map<String, String>> _requests = [
-    {'requestId': '12345', 'status': 'قيد المعالجة', 'date': '2025-02-12'},
-    {'requestId': '67890', 'status': 'قيد الحفظ ', 'date': '2025-02-10'},
-    {'requestId': '54321', 'status': 'رفض  ', 'date': '2025-05-4'},
-    {'requestId': '13245', 'status': 'مؤكد  ', 'date': '2025-03-2'},
-  ];
+  LogoutController logoutController = Get.put(LogoutController());
+  RequestStatusController requestStatusController = Get.put(RequestStatusController());
+
 
   void _navigateToPage(BuildContext context, Widget page) {
     Navigator.push(
@@ -23,6 +23,8 @@ class ServicesPage extends StatelessWidget {
   }
 
   void _showRequestsDialog(BuildContext context) {
+    requestStatusController.fetchRequestData(); // Fetch data before showing dialog
+
     showDialog(
       context: context,
       builder: (context) {
@@ -30,26 +32,36 @@ class ServicesPage extends StatelessWidget {
           title: const Text('حالة الطلبات'),
           content: SizedBox(
             width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: _requests.length,
-              itemBuilder: (context, index) {
-                final request = _requests[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  child: ListTile(
-                    title: Text("رقم الطلب: ${request['requestId']}", style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("الحالة: ${request['status']}", style: const TextStyle(color: Colors.blue)),
-                        Text("التاريخ: ${request['date']}", style: const TextStyle(color: Colors.grey)),
-                      ],
+            child: Obx(() {
+              if (requestStatusController.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (requestStatusController.errorMessage.isNotEmpty) {
+                return Center(child: Text(requestStatusController.errorMessage.value));
+              } else if (requestStatusController.requestData.isEmpty) {
+                return const Center(child: Text('لا توجد طلبات متاحة.'));
+              }
+
+              return ListView.builder(
+                shrinkWrap: true,
+                itemCount: requestStatusController.requestData.length,
+                itemBuilder: (context, index) {
+                  final request = requestStatusController.requestData[index];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: ListTile(
+                      title: Text("رقم الطلب: ${request.id}", style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("الحالة: ${request.requestStatus}", style: const TextStyle(color: Colors.blue)),
+                          Text("التاريخ: ${request.requestDate}", style: const TextStyle(color: Colors.grey)),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              );
+            }),
           ),
           actions: [
             TextButton(
@@ -64,6 +76,8 @@ class ServicesPage extends StatelessWidget {
     );
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,8 +91,53 @@ class ServicesPage extends StatelessWidget {
           actions: [
             IconButton(
               icon: const Icon(Icons.notifications, color: Colors.white),
-              onPressed: () => _showRequestsDialog(context),
+              onPressed: ()=> _showRequestsDialog(context),
             ),
+
+            Obx(
+                  () => logoutController.isLoading.value
+                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white))
+                  : IconButton(
+                icon: const Icon(Icons.logout, color: Colors.white),
+                onPressed: () {
+                  // Show confirmation dialog in Arabic before logout
+                  Get.dialog(
+                    AlertDialog(
+                      title: const Text(
+                        'تأكيد الخروج',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      content: const Text(
+                        'هل أنت متأكد أنك تريد تسجيل الخروج؟',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Get.back(); // Close the dialog
+                          },
+                          child: const Text(
+                            'إلغاء',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            logoutController.logout(); // Call logout function
+                            Get.back(); // Close the dialog
+                          },
+                          child: Text(
+                            'تأكيد',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            )
+
           ],
         ),
         backgroundColor: kPrimaryColor,
