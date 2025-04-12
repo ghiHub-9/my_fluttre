@@ -1192,7 +1192,6 @@ class _NewCardPageState extends State<NewCardPage> {
       "father_l_name": fatherLastnameController.text,
       "father_nationality": "يمني",
       "mother_f_name": motherNameController.text,
-
       "mother_s_name": motherDadnameController.text,
       "mother_thr_name": motherGrandnameController.text,
       "mother_l_name": motherLastnameController.text,
