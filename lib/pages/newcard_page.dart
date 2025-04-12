@@ -1176,14 +1176,14 @@ class _NewCardPageState extends State<NewCardPage> {
       "born_area": citizenNeighborhoodController.text,
       "born_village": villageController.text,
       "nationality": 'Yemen',
-      "marital_status": ' متزوج',
+      "marital_status": ' ${maritalStatuses[0]}',
       "religion": religions[0],
       "gender": ' male',
       "blood_type": selectedBloodType,
       "location": citizenIsolationController.text,
       "career": citizenProfessionController.text,
       "workplace": citizenWorkplaceController.text,
-      "educational_status": 'بكالوريوس',
+      "educational_status": educationLevels,
       "top_name_of_certificate": citizenHighCertificateController.text,
       "majored": citizenMajoredController.text,
       "father_f_name": fatherNameController.text,
@@ -1222,20 +1222,20 @@ class _NewCardPageState extends State<NewCardPage> {
     );
 
     // Navigate to the result screen
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => CardPage(
-    //       fullName:
-    //       "${citizenNameController.text} ${citizenFathernameController.text} ${citizenGrandFathernameController.text} ${citizenLastnameController.text}",
-    //       citizenBloodType: selectedBloodType ?? "",
-    //       village: villageController.text,
-    //       birthDate: _dateController.text,
-    //       image: _selectedImage!,
-    //       branch: selectedBranch ?? "لم يتم اختيار الفرع",
-    //     ),
-    //   ),
-    // );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CardPage(
+          fullName:
+          "${citizenNameController.text} ${citizenFathernameController.text} ${citizenGrandFathernameController.text} ${citizenLastnameController.text}",
+          citizenBloodType: selectedBloodType ?? "",
+          village: villageController.text,
+          birthDate: _dateController.text,
+          image: _selectedImage!,
+          branch: selectedBranch ?? "لم يتم اختيار الفرع",
+        ),
+      ),
+    );
   }
 
   void _validateRequiredFields() {
