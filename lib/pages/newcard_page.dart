@@ -1,8 +1,11 @@
 // ignore_for_file: prefer_const_constructors, curly_braces_in_flow_control_structures, use_build_context_synchronously
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart'; //for DateFormat
 import 'package:lastcard/constants.dart';
+import 'package:lastcard/controllers/new_card/new_card_controller.dart';
 import 'package:lastcard/pages/BranchMapPage.dart';
 import 'package:lastcard/pages/card_page.dart';
 import 'package:lastcard/pages/services_page.dart';
@@ -18,6 +21,9 @@ class NewCardPage extends StatefulWidget {
 }
 
 class _NewCardPageState extends State<NewCardPage> {
+
+  NewCardRequestController newCardRequestController = Get.put(NewCardRequestController());
+
   Map<String, bool> fieldErrors = {};
 
   void createNewRequest(String token) async {
@@ -891,140 +897,323 @@ class _NewCardPageState extends State<NewCardPage> {
     );
   }
 
+  // Widget _buildSubmitButton() {
+  //   return Obx(
+  //     ()=> newCardRequestController.isLoading.value?CircularProgressIndicator(color: Colors.white,):Center(
+  //       child: ElevatedButton(
+  //         onPressed: _onSubmit,
+  //         style: ElevatedButton.styleFrom(
+  //           backgroundColor: Colors.white,
+  //           foregroundColor: kPrimaryColor,
+  //           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+  //           textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  //         ),
+  //         child: const Text('طلب إصدار بطاقة شخصية إلكترونية'),
+  //       ),
+  //     ),
+  //   );
+  // }
+  //
+  // void _onSubmit() async {
+  //   // إعادة تعيين الأخطاء
+  //   fieldErrors.clear();
+  //
+  //   // إذا كانت هناك أخطاء، قم بتحديث الواجهة وعرض الرسائل
+  //   if (fieldErrors.isNotEmpty) {
+  //     setState(() {});
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text('يرجى ملء جميع الحقول المطلوبة'),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //     return;
+  //   }
+  //
+  //   // //api
+  //   // Map<String, dynamic> requestData = {
+  //   //   "name": citizenNameController.text,
+  //   //   "citizenFathernameController": citizenFathernameController.text,
+  //   //   "citizenGrandFathernameController": citizenGrandFathernameController.text,
+  //   //   "citizenLastnameController": citizenLastnameController.text,
+  //   //   "selectedBloodType": selectedBloodType.toString(),
+  //   //   "citizenHighCertificateController": citizenHighCertificateController.text,
+  //   //   "citizenMajoredController": citizenMajoredController.text,
+  //   //   "citizenProfessionController": citizenProfessionController.text,
+  //   //   "citizenWorkplaceController": citizenWorkplaceController.text,
+  //   //   "citizenIsolationController": citizenIsolationController.text,
+  //   //   "citizenNeighborhoodController": citizenNeighborhoodController.text,
+  //   //   "citizenStreetController": citizenStreetController.text,
+  //   //   "citizenHouseController": citizenHouseController.text,
+  //   //   "fatherNameController": fatherNameController.text,
+  //   //   "fatherDadnameController": fatherDadnameController.text,
+  //   //   "fatherGrandnameController": fatherGrandnameController.text,
+  //   //   "fatherLastnameController": fatherLastnameController.text,
+  //   //   "motherNameController": motherNameController.text,
+  //   //   "motherDadnameController": motherDadnameController.text,
+  //   //   "motherGrandnameController": motherGrandnameController.text,
+  //   //   "motherLastnameController": motherLastnameController.text,
+  //   //   "witness1Name": witness1Name.text,
+  //   //   "witness1Work": witness1Work.text,
+  //   //   "witness2Name": witness2Name.text,
+  //   //   "witness2Work": witness2Work.text,
+  //   //   "requestDateController": requestDateController.text,
+  //   //   "promulgateDateController": promulgateDateController.text,
+  //   //   "villageController": villageController.text,
+  //   //   "isAcknowledgmentChecked": isAcknowledgmentChecked,
+  //   //   "selectedBranch": selectedBranch,
+  //   //   "birthdate":_dateController.text,
+  //   //   // أضيفي باقي الحقول هنا
+  //   // };
+  //   final Map<String, String> stringFields = requestData.map(
+  //         (key, value) => MapEntry(key, value.toString()),
+  //   );
+  //
+  //   Map<String, dynamic> requestData = {
+  //     // Basic fields
+  //     // "phone_number": phoneNumberController.text,
+  //     "first_name": citizenNameController.text,
+  //     "second_name": citizenFathernameController.text,
+  //     "third_name": citizenGrandFathernameController.text,
+  //     "last_name": citizenLastnameController.text,
+  //     "national_number": nationalNumberController.text,
+  //     "email": emailController.text,
+  //
+  //     // Birth data
+  //     "birth_date_writing": birthDateWritingController.text,
+  //     "birth_date": _dateController.text,
+  //     "born_country": bornCountryController.text,
+  //     "born_city": bornCityController.text,
+  //     "born_area": citizenNeighborhoodController.text,
+  //     "born_village": villageController.text,
+  //
+  //     // Personal data
+  //     "nationality": nationalityController.text,
+  //     "marital_status": selectedMaritalStatus, // Make sure this matches one of the valid strings: متزوج, اعزب, مطلق, ارمل
+  //     "religion": religionController.text,
+  //     "gender": selectedGender, // male or female
+  //     "blood_type": selectedBloodType, // Must match one of the allowed types
+  //
+  //     // Address and occupation
+  //     "location": citizenIsolationController.text,
+  //     "career": citizenProfessionController.text,
+  //     "workplace": citizenWorkplaceController.text,
+  //
+  //     // Education
+  //     "educational_status": educationalStatusController.text,
+  //     "top_name_of_certificate": citizenHighCertificateController.text,
+  //     "majored": citizenMajoredController.text,
+  //
+  //     // Father data
+  //     "father_f_name": fatherNameController.text,
+  //     "father_s_name": fatherDadnameController.text,
+  //     "father_thr_name": fatherGrandnameController.text,
+  //     "father_l_name": fatherLastnameController.text,
+  //     "father_nationality": fatherNationalityController.text,
+  //
+  //     // Mother data
+  //     "mother_f_name": motherNameController.text,
+  //     "mother_s_name": motherDadnameController.text,
+  //     "mother_thr_name": motherGrandnameController.text,
+  //     "mother_l_name": motherLastnameController.text,
+  //     "mother_nationality": motherNationalityController.text,
+  //
+  //     // Branch ID
+  //     "branch": selectedBranch,
+  //   };
+  //
+  //   await newCardRequestController.submitNewCard(fields: stringFields, userPhoto: _selectedImage, documents: _selectedImagepaper);
+  //
+  //   // try {
+  //   //   var response = await _authService.submitNewCardRequest(requestData);
+  //   //   print("نجحت عملية إصدار البطاقة: $response"); // يمكنكِ إظهار إشعار نجاح هنا
+  //   // } catch (e) {
+  //   //   print("خطأ في اصدار البطاقة: $e"); // يمكنكِ إظهار رسالة خطأ للمستخدم
+  //   // }
+  //
+  //   // التحقق من الحقول الفارغة
+  //   if (citizenNameController.text.isEmpty) fieldErrors['citizenName'] = true;
+  //   if (citizenFathernameController.text.isEmpty)
+  //     fieldErrors['citizenFathername'] = true;
+  //   if (citizenGrandFathernameController.text.isEmpty)
+  //     fieldErrors['citizenGrandFathername'] = true;
+  //   if (citizenLastnameController.text.isEmpty)
+  //     fieldErrors['citizenLastname'] = true;
+  //   if (selectedBloodType == null) fieldErrors['citizenBloodType'] = true;
+  //
+  //   if (citizenHighCertificateController.text.isEmpty)
+  //     fieldErrors['citizenHighCertificate'] = true;
+  //   if (citizenMajoredController.text.isEmpty)
+  //     fieldErrors['citizenMajored'] = true;
+  //   if (citizenProfessionController.text.isEmpty)
+  //     fieldErrors['citizenProfession'] = true;
+  //   if (citizenWorkplaceController.text.isEmpty)
+  //     fieldErrors['citizenWorkplace'] = true;
+  //   if (citizenIsolationController.text.isEmpty)
+  //     fieldErrors['citizenIsolation'] = true;
+  //   if (citizenNeighborhoodController.text.isEmpty)
+  //     fieldErrors['citizenNeighborhood'] = true;
+  //   if (citizenStreetController.text.isEmpty)
+  //     fieldErrors['citizenStreet'] = true;
+  //   if (citizenHouseController.text.isEmpty) fieldErrors['citizenHouse'] = true;
+  //
+  //   if (fatherNameController.text.isEmpty) fieldErrors['fatherName'] = true;
+  //   if (fatherDadnameController.text.isEmpty)
+  //     fieldErrors['fatherDadname'] = true;
+  //   if (fatherGrandnameController.text.isEmpty)
+  //     fieldErrors['fatherGrandname'] = true;
+  //   if (fatherLastnameController.text.isEmpty)
+  //     fieldErrors['fatherLastname'] = true;
+  //
+  //   if (motherNameController.text.isEmpty) fieldErrors['motherName'] = true;
+  //   if (motherDadnameController.text.isEmpty)
+  //     fieldErrors['motherDadname'] = true;
+  //   if (motherGrandnameController.text.isEmpty)
+  //     fieldErrors['motherGrandname'] = true;
+  //   if (motherLastnameController.text.isEmpty)
+  //     fieldErrors['motherLastname'] = true;
+  //
+  //   if (witness1Name.text.isEmpty) fieldErrors['witness1Name'] = true;
+  //   if (witness1Work.text.isEmpty) fieldErrors['witness1Work'] = true;
+  //   if (witness2Name.text.isEmpty) fieldErrors['witness2Name'] = true;
+  //   if (witness2Work.text.isEmpty) fieldErrors['witness2Work'] = true;
+  //
+  //   if (requestDateController.text.isEmpty) fieldErrors['requestDate'] = true;
+  //   if (promulgateDateController.text.isEmpty)
+  //     fieldErrors['promulgateDate'] = true;
+  //   if (villageController.text.isEmpty) fieldErrors['village'] = true;
+  //   if (!isAcknowledgmentChecked) fieldErrors['acknowledgment'] = true;
+  //   if (_selectedImage == null) fieldErrors['image'] = true;
+  //   if (_selectedImagepaper == null) fieldErrors['imagePaper'] = true;
+  //   if (selectedBranch == null) fieldErrors['branch'] = true;
+  //
+  //   // إذا لم تكن هناك أخطاء، تابع العملية
+  //   ScaffoldMessenger.of(context).clearSnackBars();
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     const SnackBar(
+  //       content: Text('تم حفظ بياناتك مؤقتاً. بياناتك قيد الفحص والتأكد.'),
+  //       backgroundColor: Colors.green,
+  //     ),
+  //   );
+  //
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => CardPage(
+  //         fullName:
+  //             "${citizenNameController.text} ${citizenFathernameController.text} ${citizenGrandFathernameController.text} ${citizenLastnameController.text}",
+  //         citizenBloodType: selectedBloodType ?? "",
+  //         village: villageController.text,
+  //         birthDate: _dateController.text,
+  //         image: _selectedImage!,
+  //         branch: selectedBranch ?? "لم يتم اختيار الفرع",
+  //         // issueDate: _startdateController.text,
+  //         // expirationDate: _enddateController.text,
+  //       ),
+  //     ),
+  //   );
+  // }
+
+
   Widget _buildSubmitButton() {
-    return Center(
-      child: ElevatedButton(
-        onPressed: _onSubmit,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: kPrimaryColor,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-          textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return Obx(
+          () => newCardRequestController.isLoading.value
+          ? const CircularProgressIndicator(color: Colors.white)
+          : Center(
+        child: ElevatedButton(
+          onPressed: _onSubmit,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: kPrimaryColor,
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          child: const Text('طلب إصدار بطاقة شخصية إلكترونية'),
         ),
-        child: const Text('طلب إصدار بطاقة شخصية إلكترونية'),
       ),
     );
   }
 
   void _onSubmit() async {
-    // إعادة تعيين الأخطاء
+    // Reset any previous errors
     fieldErrors.clear();
 
-    // إذا كانت هناك أخطاء، قم بتحديث الواجهة وعرض الرسائل
-    if (fieldErrors.isNotEmpty) {
-      setState(() {});
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('يرجى ملء جميع الحقول المطلوبة'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+    // Validate required fields
+    _validateRequiredFields();
 
-    // //api
-    // Map<String, dynamic> requestData = {
-    //   "name": citizenNameController.text,
-    //   "citizenFathernameController": citizenFathernameController.text,
-    //   "citizenGrandFathernameController": citizenGrandFathernameController.text,
-    //   "citizenLastnameController": citizenLastnameController.text,
-    //   "selectedBloodType": selectedBloodType,
-    //   "citizenHighCertificateController": citizenHighCertificateController.text,
-    //   "citizenMajoredController": citizenMajoredController.text,
-    //   "citizenProfessionController": citizenProfessionController.text,
-    //   "citizenWorkplaceController": citizenWorkplaceController.text,
-    //   "citizenIsolationController": citizenIsolationController.text,
-    //   "citizenNeighborhoodController": citizenNeighborhoodController.text,
-    //   "citizenStreetController": citizenStreetController.text,
-    //   "citizenHouseController": citizenHouseController.text,
-    //   "fatherNameController": fatherNameController.text,
-    //   "fatherDadnameController": fatherDadnameController.text,
-    //   "fatherGrandnameController": fatherGrandnameController.text,
-    //   "fatherLastnameController": fatherLastnameController.text,
-    //   "motherNameController": motherNameController.text,
-    //   "motherDadnameController": motherDadnameController.text,
-    //   "motherGrandnameController": motherGrandnameController.text,
-    //   "motherLastnameController": motherLastnameController.text,
-    //   "witness1Name": witness1Name.text,
-    //   "witness1Work": witness1Work.text,
-    //   "witness2Name": witness2Name.text,
-    //   "witness2Work": witness2Work.text,
-    //   "requestDateController": requestDateController.text,
-    //   "promulgateDateController": promulgateDateController.text,
-    //   "villageController": villageController.text,
-    //   "isAcknowledgmentChecked": isAcknowledgmentChecked,
-    //   "_selectedImage": _selectedImage,
-    //   "_selectedImagepaper": _selectedImagepaper,
-    //   "selectedBranch": selectedBranch,
-    //   "birthdate":_dateController.text,
-    //   // أضيفي باقي الحقول هنا
-    // };
 
-    // try {
-    //   var response = await _authService.submitNewCardRequest(requestData);
-    //   print("نجحت عملية إصدار البطاقة: $response"); // يمكنكِ إظهار إشعار نجاح هنا
-    // } catch (e) {
-    //   print("خطأ في اصدار البطاقة: $e"); // يمكنكِ إظهار رسالة خطأ للمستخدم
+    // if (fieldErrors.isNotEmpty) {
+    //   setState(() {});
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(
+    //       content: Text('يرجى ملء جميع الحقول المطلوبة'),
+    //       backgroundColor: Colors.red,
+    //     ),
+    //   );
+    //   return;
     // }
 
-    // التحقق من الحقول الفارغة
-    if (citizenNameController.text.isEmpty) fieldErrors['citizenName'] = true;
-    if (citizenFathernameController.text.isEmpty)
-      fieldErrors['citizenFathername'] = true;
-    if (citizenGrandFathernameController.text.isEmpty)
-      fieldErrors['citizenGrandFathername'] = true;
-    if (citizenLastnameController.text.isEmpty)
-      fieldErrors['citizenLastname'] = true;
-    if (selectedBloodType == null) fieldErrors['citizenBloodType'] = true;
+    String generateNationalId() {
+      final Random random = Random();
+      String randomDigits =
+      List.generate(10, (_) => random.nextInt(10).toString()).join();
+      return "0$randomDigits";
+    }
 
-    if (citizenHighCertificateController.text.isEmpty)
-      fieldErrors['citizenHighCertificate'] = true;
-    if (citizenMajoredController.text.isEmpty)
-      fieldErrors['citizenMajored'] = true;
-    if (citizenProfessionController.text.isEmpty)
-      fieldErrors['citizenProfession'] = true;
-    if (citizenWorkplaceController.text.isEmpty)
-      fieldErrors['citizenWorkplace'] = true;
-    if (citizenIsolationController.text.isEmpty)
-      fieldErrors['citizenIsolation'] = true;
-    if (citizenNeighborhoodController.text.isEmpty)
-      fieldErrors['citizenNeighborhood'] = true;
-    if (citizenStreetController.text.isEmpty)
-      fieldErrors['citizenStreet'] = true;
-    if (citizenHouseController.text.isEmpty) fieldErrors['citizenHouse'] = true;
+    // Prepare the data for submission
+    final Map<String, dynamic> requestData = {
+      "phone_number":phoneController.text,
+      "first_name": citizenNameController.text,
+      "second_name": citizenFathernameController.text,
+      "third_name": citizenGrandFathernameController.text,
+      "last_name": citizenLastnameController.text,
+      "national_number": generateNationalId().toString(),
+      "email": 'diaa.alqadrei@gmail.com',
+      "birth_date_writing": '2020-10-05',
+      "birth_date": _dateController.text,
+      "born_country": countries[1],
+      "born_city": birthCity[1],
+      "born_area": citizenNeighborhoodController.text,
+      "born_village": villageController.text,
+      "nationality": 'Yemen',
+      "marital_status": ' متزوج',
+      "religion": religions[0],
+      "gender": ' male',
+      "blood_type": selectedBloodType,
+      "location": citizenIsolationController.text,
+      "career": citizenProfessionController.text,
+      "workplace": citizenWorkplaceController.text,
+      "educational_status": 'بكالوريوس',
+      "top_name_of_certificate": citizenHighCertificateController.text,
+      "majored": citizenMajoredController.text,
+      "father_f_name": fatherNameController.text,
+      "father_s_name": fatherDadnameController.text,
+      "father_thr_name": fatherGrandnameController.text,
+      "father_l_name": fatherLastnameController.text,
+      "father_nationality": "يمني",
+      "mother_f_name": motherNameController.text,
+      "mother_s_name": motherDadnameController.text,
+      "mother_thr_name": motherGrandnameController.text,
+      "mother_l_name": motherLastnameController.text,
+      "mother_nationality": "يمني",
+      "branch": 1,
+    };
 
-    if (fatherNameController.text.isEmpty) fieldErrors['fatherName'] = true;
-    if (fatherDadnameController.text.isEmpty)
-      fieldErrors['fatherDadname'] = true;
-    if (fatherGrandnameController.text.isEmpty)
-      fieldErrors['fatherGrandname'] = true;
-    if (fatherLastnameController.text.isEmpty)
-      fieldErrors['fatherLastname'] = true;
 
-    if (motherNameController.text.isEmpty) fieldErrors['motherName'] = true;
-    if (motherDadnameController.text.isEmpty)
-      fieldErrors['motherDadname'] = true;
-    if (motherGrandnameController.text.isEmpty)
-      fieldErrors['motherGrandname'] = true;
-    if (motherLastnameController.text.isEmpty)
-      fieldErrors['motherLastname'] = true;
+    print(requestData.toString());
+    // final Map<String, String> stringFields =
+    // requestData.map((key, value) => MapEntry(key, value.toString()));
 
-    if (witness1Name.text.isEmpty) fieldErrors['witness1Name'] = true;
-    if (witness1Work.text.isEmpty) fieldErrors['witness1Work'] = true;
-    if (witness2Name.text.isEmpty) fieldErrors['witness2Name'] = true;
-    if (witness2Work.text.isEmpty) fieldErrors['witness2Work'] = true;
+    // Call the controller to submit
+    await newCardRequestController.submitNewCard(
+      fields: requestData,
+      userPhoto: _selectedImage,
+      documents: _selectedImagepaper,
+    );
 
-    if (requestDateController.text.isEmpty) fieldErrors['requestDate'] = true;
-    if (promulgateDateController.text.isEmpty)
-      fieldErrors['promulgateDate'] = true;
-    if (villageController.text.isEmpty) fieldErrors['village'] = true;
-    if (!isAcknowledgmentChecked) fieldErrors['acknowledgment'] = true;
-    if (_selectedImage == null) fieldErrors['image'] = true;
-    if (_selectedImagepaper == null) fieldErrors['imagePaper'] = true;
-    if (selectedBranch == null) fieldErrors['branch'] = true;
-
-    // إذا لم تكن هناك أخطاء، تابع العملية
+    // Show success feedback
     ScaffoldMessenger.of(context).clearSnackBars();
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('تم حفظ بياناتك مؤقتاً. بياناتك قيد الفحص والتأكد.'),
@@ -1032,22 +1221,61 @@ class _NewCardPageState extends State<NewCardPage> {
       ),
     );
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CardPage(
-          fullName:
-              "${citizenNameController.text} ${citizenFathernameController.text} ${citizenGrandFathernameController.text} ${citizenLastnameController.text}",
-          citizenBloodType: selectedBloodType ?? "",
-          village: villageController.text,
-          birthDate: _dateController.text,
-          image: _selectedImage!,
-          branch: selectedBranch ?? "لم يتم اختيار الفرع",
-          // issueDate: _startdateController.text,
-          // expirationDate: _enddateController.text,
-        ),
-      ),
-    );
+    // Navigate to the result screen
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => CardPage(
+    //       fullName:
+    //       "${citizenNameController.text} ${citizenFathernameController.text} ${citizenGrandFathernameController.text} ${citizenLastnameController.text}",
+    //       citizenBloodType: selectedBloodType ?? "",
+    //       village: villageController.text,
+    //       birthDate: _dateController.text,
+    //       image: _selectedImage!,
+    //       branch: selectedBranch ?? "لم يتم اختيار الفرع",
+    //     ),
+    //   ),
+    // );
+  }
+
+  void _validateRequiredFields() {
+    void check(String key, TextEditingController controller) {
+      if (controller.text.isEmpty) fieldErrors[key] = true;
+    }
+
+    check('citizenName', citizenNameController);
+    check('citizenFathername', citizenFathernameController);
+    check('citizenGrandFathername', citizenGrandFathernameController);
+    check('citizenLastname', citizenLastnameController);
+    check('citizenHighCertificate', citizenHighCertificateController);
+    check('citizenMajored', citizenMajoredController);
+    check('citizenProfession', citizenProfessionController);
+    check('citizenWorkplace', citizenWorkplaceController);
+    check('citizenIsolation', citizenIsolationController);
+    check('citizenNeighborhood', citizenNeighborhoodController);
+    check('citizenStreet', citizenStreetController);
+    check('citizenHouse', citizenHouseController);
+    check('fatherName', fatherNameController);
+    check('fatherDadname', fatherDadnameController);
+    check('fatherGrandname', fatherGrandnameController);
+    check('fatherLastname', fatherLastnameController);
+    check('motherName', motherNameController);
+    check('motherDadname', motherDadnameController);
+    check('motherGrandname', motherGrandnameController);
+    check('motherLastname', motherLastnameController);
+    check('witness1Name', witness1Name);
+    check('witness1Work', witness1Work);
+    check('witness2Name', witness2Name);
+    check('witness2Work', witness2Work);
+    check('requestDate', requestDateController);
+    check('promulgateDate', promulgateDateController);
+    check('village', villageController);
+
+    if (selectedBloodType == null) fieldErrors['citizenBloodType'] = true;
+    if (!isAcknowledgmentChecked) fieldErrors['acknowledgment'] = true;
+    if (_selectedImage == null) fieldErrors['image'] = true;
+    if (_selectedImagepaper == null) fieldErrors['imagePaper'] = true;
+    if (selectedBranch == null) fieldErrors['branch'] = true;
   }
 
   Widget _buildTextFieldWithController(

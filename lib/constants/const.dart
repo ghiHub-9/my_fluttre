@@ -1,5 +1,5 @@
 class APIConfig {
-  static const String baseUrl = "http://192.168.1.4:8001/api"; // عدلي الـ IP هنا عند الحاجة
+  static const String baseUrl = "http://192.168.1.6:8001/api"; // عدلي الـ IP هنا عند الحاجة
 
   // المسارات المختلفة داخل الـ API
   static const String loginEndpoint = "$baseUrl/login";
